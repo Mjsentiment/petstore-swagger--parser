@@ -1,0 +1,98 @@
+name: Swagger Parser CI
+
+on:
+  push:
+    branches:
+      - develop
+      - release/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Swagger CLI
+        run: npm install -g swagger-cli
+
+      - name: Validate Swagger Spec
+        run: swagger-cli validate swagger.yaml
+
+      - name: Run Unit Tests
+        run: pytest tests/
+
+      - name: Run Swagger Parser
+        run: python swagger_parser.py
+
+      - name: Deploy Docs
+        run: ./deploy_docs.sh
+
+      - name: Get Version
+        run: echo "VERSION=$(python get_version.py)" >> $GITHUB_ENV
+
+      - name: Tag Release
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag -a $VERSION -m "Release $VERSION"
+          git push origin $VERSION
+name: Swagger Parser CI
+
+on:
+  push:
+    branches:
+      - develop
+      - release/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Swagger CLI
+        run: npm install -g swagger-cli
+
+      - name: Validate Swagger Spec
+        run: swagger-cli validate swagger.yaml
+
+      - name: Run Unit Tests
+        run: pytest tests/
+
+      - name: Run Swagger Parser
+        run: python swagger_parser.py
+
+      - name: Deploy Docs
+        run: ./deploy_docs.sh
+
+      - name: Get Version
+        run: echo "VERSION=$(python get_version.py)" >> $GITHUB_ENV
+
+      - name: Tag Release
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag -a $VERSION -m "Release $VERSION"
+          git push origin $VERSION
